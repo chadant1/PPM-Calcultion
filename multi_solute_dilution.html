@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Art of Drink Dilution 🍹</title>
+    <style>
+        :root {
+            --color-primary: #00bcd4;
+            --color-secondary: #ff9800;
+            --color-tertiary: #4caf50;
+            --color-background: #f4f4f9;
+            --color-card: #ffffff;
+            --color-text: #333333;
+            --color-border: #e0e0e0;
+            --color-shadow: rgba(0, 0, 0, 0.1);
+            --color-danger: #f44336;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        header {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px var(--color-shadow);
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .calc-section {
+            background-color: var(--color-card);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px var(--color-shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .calc-section:hover {
+            transform: translateY(-5px);
+        }
+
+        .calc-section h2 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid;
+            font-size: 1.8em;
+        }
+
+        .essence h2 { border-color: var(--color-primary); color: var(--color-primary); }
+        .syrup h2 { border-color: var(--color-secondary); color: var(--color-secondary); }
+        .drink h2 { border-color: var(--color-tertiary); color: var(--color-tertiary); }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        input[type="number"], input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus, input[type="text"]:focus, select:focus {
+            border-color: var(--color-primary);
+            outline: none;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--color-background);
+            border-radius: 5px;
+            border-left: 5px solid;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .result-essence { border-color: var(--color-primary); }
+        .result-syrup { border-color: var(--color-secondary); }
+        .result-drink { border-color: var(--color-tertiary); }
+
+        /* Solute Entry Styles */
+        .solute-entry {
+            background-color: #fafafa;
+            border: 1px solid var(--color-border);
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .solute-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .solute-name {
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        .remove-btn {
+            background-color: var(--color-danger);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: background-color 0.3s;
+        }
+
+        .remove-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .add-solute-btn {
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            width: 100%;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .add-solute-btn:hover {
+            background-color: #0097a7;
+        }
+
+        .ppm-breakdown {
+            font-size: 0.95em;
+            line-height: 1.8;
+        }
+
+        .ppm-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .ppm-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            margin-top: 5px;
+            padding-top: 10px;
+            border-top: 2px solid var(--color-border);
+        }
+
+        .density-group { display: none; }
+
+        #syrup-ppm-group { display: block; }
+        #syrup-essence-vol-group { display: none; }
+        #drink-target-ppm-group { display: block; }
+        #drink-syrup-vol-group { display: none; }
+
+        .fema-selector {
+            margin-bottom: 10px;
+        }
+
+        .desired-ppm-display {
+            background-color: #e8f5e9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 3px solid var(--color-tertiary);
+            font-size: 0.95em;
+        }
+
+        .fema-info {
+            font-size: 0.85em;
+            color: #666;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .fema-search-wrapper {
+            position: relative;
+        }
+
+        .fema-search-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+
+        .fema-dropdown-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid var(--color-border);
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 4px 8px var(--color-shadow);
+            z-index: 1000;
+            display: none;
+        }
+
+        .fema-dropdown-list.show {
+            display: block;
+        }
+
+        .fema-dropdown-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .fema-dropdown-item:hover {
+            background-color: var(--color-background);
+        }
+
+        .fema-dropdown-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>The Art of Drink Dilution 🍹</h1>
+        <p>From **Essence** concentrate to the final refreshing **Drink**!</p>
+        <div style="margin-top: 15px;">
+            <label for="csv-upload" style="background: white; color: var(--color-primary); padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 0.9em; display: inline-block;">
+                📁 Upload FEMA CSV Database
+            </label>
+            <input type="file" id="csv-upload" accept=".csv" style="display: none;" onchange="handleCSVUpload(event)">
+            <span id="upload-status" style="margin-left: 10px; font-size: 0.9em;"></span>
+        </div>
+    </header>
+
+    <div class="calc-section essence">
+        <h2>1. The Essence Calculation ✨</h2>
+        <p>Add multiple solutes to create your concentrate solution.</p>
+        
+        <div class="input-group">
+            <label for="essence-solvent">Total Solvent Volume (ml):</label>
+            <input type="number" id="essence-solvent" value="100" step="1" min="0">
+        </div>
+
+        <div id="solutes-container"></div>
+        
+        <button class="add-solute-btn" onclick="addSolute()">+ Add Solute</button>
+
+        <div class="result result-essence">
+            <div class="ppm-breakdown" id="essence-ppm-breakdown"></div>
+        </div>
+    </div>
+    
+    <div class="calc-section syrup">
+        <h2>2. The Syrup Calculation 🍯</h2>
+        <p>Dilute your Essence to create a convenient Syrup concentrate.</p>
+        
+        <div class="input-group">
+            <label for="syrup-calc-mode">Calculation Mode:</label>
+            <select id="syrup-calc-mode" onchange="toggleSyrupMode()">
+                <option value="ppm">Calculate Essence needed for Target PPM</option>
+                <option value="ml">Calculate Resulting PPM from Essence Volume</option>
+            </select>
+        </div>
+
+        <div class="input-group" id="syrup-ppm-group">
+            <label for="syrup-target-ppm">Desired Total Syrup PPM (Target):</label>
+            <input type="number" id="syrup-target-ppm" value="100" step="1" min="0">
+        </div>
+
+        <div class="input-group" id="syrup-essence-vol-group">
+            <label for="syrup-essence-vol">Essence Volume Added (ml):</label>
+            <input type="number" id="syrup-essence-vol" value="20" step="1" min="0">
+        </div>
+
+        <div class="input-group">
+            <label for="syrup-final-volume">Syrup Final Volume (ml):</label>
+            <input type="number" id="syrup-final-volume" value="1000" step="10" min="10">
+        </div>
+
+        <div class="result result-syrup">
+            <span id="syrup-result-action"></span>
+            <div class="ppm-breakdown" id="syrup-ppm-breakdown" style="margin-top: 15px;"></div>
+        </div>
+    </div>
+
+    <div class="calc-section drink">
+        <h2>3. The Final Drink Calculation 🍹</h2>
+        <p>Mix your Syrup into the perfect refreshing glass!</p>
+        
+        <div class="input-group">
+            <label for="drink-calc-mode">Calculation Mode:</label>
+            <select id="drink-calc-mode" onchange="toggleDrinkMode()">
+                <option value="ppm">Calculate Syrup Volume needed for Target PPM</option>
+                <option value="ml">Calculate Resulting PPM from Syrup Volume Added</option>
+            </select>
+        </div>
+
+        <div class="input-group" id="drink-target-ppm-group">
+            <label for="drink-target-ppm">Desired Final Total Drink PPM (Target):</label>
+            <input type="number" id="drink-target-ppm" value="5" step="0.1" min="0">
+        </div>
+
+        <div class="input-group" id="drink-syrup-vol-group">
+            <label for="drink-syrup-vol">Syrup Volume Added (ml):</label>
+            <input type="number" id="drink-syrup-vol" value="20" step="1" min="0">
+        </div>
+
+        <div class="input-group">
+            <label for="drink-glass-volume">Glass Volume (ml):</label>
+            <input type="number" id="drink-glass-volume" value="355" step="1" min="1">
+        </div>
+
+        <div class="result result-drink">
+            <span id="drink-result-action"></span>
+            <br>
+            <strong>Sparkling Water:</strong> <span id="drink-water-result">0.00</span> ml
+            <div class="ppm-breakdown" id="drink-ppm-breakdown" style="margin-top: 15px;"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+    const ESSENCE_FACTOR = 1000000;
+    let soluteCounter = 0;
+    let solutes = [];
+    let essenceTotalPPM = 0;
+    let essenceSolutePPMs = {};
+    let syrupSolutePPMs = {};
+    let syrupTotalPPM = 0;
+
+    function safeParseFloat(id) {
+        return parseFloat(document.getElementById(id).value) || 0;
+    }
+
+    function addSolute() {
+        soluteCounter++;
+        const soluteId = `solute-${soluteCounter}`;
+        
+        const soluteDiv = document.createElement('div');
+        soluteDiv.className = 'solute-entry';
+        soluteDiv.id = soluteId;
+        
+        soluteDiv.innerHTML = `
+            <div class="solute-header">
+                <button class="remove-btn" onclick="removeSolute('${soluteId}')">Remove</button>
+            </div>
+            
+            <div class="input-group fema-selector">
+                <label for="${soluteId}-fema-search">Search FEMA Database:</label>
+                <div class="fema-search-wrapper">
+                    <input type="text" 
+                           id="${soluteId}-fema-search" 
+                           class="fema-search-input"
+                           placeholder="Type to search flavors..."
+                           autocomplete="off"
+                           onkeyup="filterFEMAList('${soluteId}')"
+                           onfocus="showFEMAList('${soluteId}')"
+                           onblur="hideFEMAList('${soluteId}')">
+                    <div id="${soluteId}-fema-list" class="fema-dropdown-list"></div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="${soluteId}-name">Solute Name:</label>
+                <input type="text" class="solute-name-input" id="${soluteId}-name" placeholder="Solute Name" value="Solute ${soluteCounter}">
+            </div>
+            
+            <div class="fema-info" id="${soluteId}-fema-info"></div>
+            
+            <div class="input-group">
+                <label for="${soluteId}-unit">Unit:</label>
+                <select id="${soluteId}-unit" onchange="updateEssence()">
+                    <option value="g">Grams (g)</option>
+                    <option value="ml">Milliliters (ml)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="${soluteId}-amount">Amount (<span id="${soluteId}-unit-label">g</span>):</label>
+                <input type="number" id="${soluteId}-amount" value="0.5" step="0.001" min="0">
+            </div>
+
+            <div class="input-group density-group" id="${soluteId}-density-group">
+                <label for="${soluteId}-density">Density (g/ml):</label>
+                <input type="number" id="${soluteId}-density" value="1.0" step="0.01" min="0.01">
+            </div>
+        `;
+        
+        document.getElementById('solutes-container').appendChild(soluteDiv);
+        
+        // Add event listeners
+        document.getElementById(`${soluteId}-name`).addEventListener('input', updateEssence);
+        document.getElementById(`${soluteId}-unit`).addEventListener('change', updateEssence);
+        document.getElementById(`${soluteId}-amount`).addEventListener('input', updateEssence);
+        document.getElementById(`${soluteId}-density`).addEventListener('input', updateEssence);
+        
+        solutes.push(soluteId);
+        updateEssence();
+    }
+
+    function filterFEMAList(soluteId) {
+        const searchInput = document.getElementById(`${soluteId}-fema-search`);
+        const searchTerm = searchInput.value.toLowerCase();
+        const listContainer = document.getElementById(`${soluteId}-fema-list`);
+        
+        // Filter database
+        const filteredItems = Object.keys(femaDatabase)
+            .filter(name => name.toLowerCase().includes(searchTerm))
+            .sort();
+        
+        // Build list HTML
+        let listHTML = '';
+        if (filteredItems.length === 0) {
+            listHTML = '<div class="fema-dropdown-item" style="color: #999;">No matches found</div>';
+        } else {
+            filteredItems.slice(0, 50).forEach(name => { // Limit to 50 results
+                listHTML += `<div class="fema-dropdown-item" onmousedown="selectFEMAFromList('${soluteId}', '${name}')">${name}</div>`;
+            });
+            if (filteredItems.length > 50) {
+                listHTML += `<div class="fema-dropdown-item" style="color: #999; font-style: italic;">...and ${filteredItems.length - 50} more. Keep typing to narrow results.</div>`;
+            }
+        }
+        
+        listContainer.innerHTML = listHTML;
+        listContainer.classList.add('show');
+    }
+
+    function showFEMAList(soluteId) {
+        filterFEMAList(soluteId);
+    }
+
+    function hideFEMAList(soluteId) {
+        setTimeout(() => {
+            const listContainer = document.getElementById(`${soluteId}-fema-list`);
+            listContainer.classList.remove('show');
+        }, 200);
+    }
+
+    function selectFEMAFromList(soluteId, flavorName) {
+        const solute = femaDatabase[flavorName];
+        if (!solute) return;
+        
+        // Update search input
+        document.getElementById(`${soluteId}-fema-search`).value = flavorName;
+        
+        // Update name field
+        document.getElementById(`${soluteId}-name`).value = solute.name;
+        
+        // Update density
+        document.getElementById(`${soluteId}-density`).value = solute.density;
+        
+        // Store FEMA info for this solute
+        selectedSolutes[soluteId] = solute;
+        
+        // Display FEMA info
+        document.getElementById(`${soluteId}-fema-info`).textContent = 
+            `FEMA #${solute.femaNumber} | Density: ${solute.density} g/ml | Recommended Beverage PPM: ${solute.beveragePPM}`;
+        
+        // Hide list
+        hideFEMAList(soluteId);
+        
+        updateEssence();
+    }
+
+    function removeSolute(soluteId) {
+        document.getElementById(soluteId).remove();
+        solutes = solutes.filter(id => id !== soluteId);
+        delete selectedSolutes[soluteId];
+        updateEssence();
+    }
+
+    function updateEssence() {
+        const solventVolume = safeParseFloat('essence-solvent');
+        const solventMass_g = solventVolume * 1;
+        
+        let totalSoluteMass_g = 0;
+        essenceSolutePPMs = {};
+        
+        solutes.forEach(soluteId => {
+            const nameInput = document.getElementById(`${soluteId}-name`);
+            if (!nameInput) return;
+            
+            const name = nameInput.value || `Solute ${soluteId.split('-')[1]}`;
+            const unit = document.getElementById(`${soluteId}-unit`).value;
+            const amount = safeParseFloat(`${soluteId}-amount`);
+            const density = safeParseFloat(`${soluteId}-density`);
+            
+            // Update UI
+            document.getElementById(`${soluteId}-unit-label`).textContent = unit;
+            document.getElementById(`${soluteId}-density-group`).style.display = (unit === 'ml') ? 'block' : 'none';
+            
+            let soluteMass_g;
+            if (unit === 'ml') {
+                soluteMass_g = amount * density;
+            } else {
+                soluteMass_g = amount;
+            }
+            
+            totalSoluteMass_g += soluteMass_g;
+            
+            const totalMass_g = totalSoluteMass_g + solventMass_g;
+            if (totalMass_g > 0) {
+                essenceSolutePPMs[name] = (soluteMass_g / totalMass_g) * ESSENCE_FACTOR;
+            } else {
+                essenceSolutePPMs[name] = 0;
+            }
+        });
+        
+        const totalMass_g = totalSoluteMass_g + solventMass_g;
+        if (totalMass_g > 0) {
+            essenceTotalPPM = (totalSoluteMass_g / totalMass_g) * ESSENCE_FACTOR;
+        } else {
+            essenceTotalPPM = 0;
+        }
+        
+        // Display breakdown
+        let breakdownHTML = '<strong>Essence PPM Breakdown:</strong><div style="margin-top: 10px;">';
+        Object.entries(essenceSolutePPMs).forEach(([name, ppm]) => {
+            breakdownHTML += `<div class="ppm-item"><span>${name}:</span><span>${ppm.toFixed(2)} ppm</span></div>`;
+        });
+        breakdownHTML += `<div class="ppm-item"><span>Total:</span><span>${essenceTotalPPM.toFixed(2)} ppm</span></div>`;
+        breakdownHTML += '</div>';
+        
+        document.getElementById('essence-ppm-breakdown').innerHTML = breakdownHTML;
+        updateSyrup();
+    }
+
+    function toggleSyrupMode() {
+        const mode = document.getElementById('syrup-calc-mode').value;
+        document.getElementById('syrup-ppm-group').style.display = (mode === 'ppm') ? 'block' : 'none';
+        document.getElementById('syrup-essence-vol-group').style.display = (mode === 'ml') ? 'block' : 'none';
+        updateSyrup();
+    }
+
+    function updateSyrup() {
+        const mode = document.getElementById('syrup-calc-mode').value;
+        const finalVolume_ml = safeParseFloat('syrup-final-volume');
+        
+        let essenceVolume_ml = 0;
+        let calculatedTotalPPM = 0;
+        let resultActionText = "";
+        
+        if (mode === 'ppm') {
+            const targetPPM = safeParseFloat('syrup-target-ppm');
+            if (essenceTotalPPM > 0) {
+                essenceVolume_ml = (targetPPM * finalVolume_ml) / essenceTotalPPM;
+            }
+            calculatedTotalPPM = targetPPM;
+            resultActionText = `Add ${essenceVolume_ml.toFixed(2)} ml of <strong>Essence</strong> to create <strong>Syrup</strong>`;
+        } else {
+            essenceVolume_ml = safeParseFloat('syrup-essence-vol');
+            if (finalVolume_ml > 0) {
+                calculatedTotalPPM = (essenceTotalPPM * essenceVolume_ml) / finalVolume_ml;
+            }
+            resultActionText = `Using ${essenceVolume_ml.toFixed(2)} ml of <strong>Essence</strong>`;
+        }
+        
+        // Calculate individual solute PPMs in syrup
+        syrupSolutePPMs = {};
+        Object.entries(essenceSolutePPMs).forEach(([name, essencePPM]) => {
+            if (finalVolume_ml > 0) {
+                syrupSolutePPMs[name] = (essencePPM * essenceVolume_ml) / finalVolume_ml;
+            } else {
+                syrupSolutePPMs[name] = 0;
+            }
+        });
+        
+        syrupTotalPPM = calculatedTotalPPM;
+        
+        // Display breakdown
+        let breakdownHTML = '<strong>Syrup PPM Breakdown:</strong><div style="margin-top: 10px;">';
+        Object.entries(syrupSolutePPMs).forEach(([name, ppm]) => {
+            breakdownHTML += `<div class="ppm-item"><span>${name}:</span><span>${ppm.toFixed(2)} ppm</span></div>`;
+        });
+        breakdownHTML += `<div class="ppm-item"><span>Total:</span><span>${syrupTotalPPM.toFixed(2)} ppm</span></div>`;
+        breakdownHTML += '</div>';
+        
+        document.getElementById('syrup-result-action').innerHTML = resultActionText;
+        document.getElementById('syrup-ppm-breakdown').innerHTML = breakdownHTML;
+        
+        updateDrink();
+    }
+
+    function toggleDrinkMode() {
+        const mode = document.getElementById('drink-calc-mode').value;
+        document.getElementById('drink-target-ppm-group').style.display = (mode === 'ppm') ? 'block' : 'none';
+        document.getElementById('drink-syrup-vol-group').style.display = (mode === 'ml') ? 'block' : 'none';
+        updateDrink();
+    }
+
+    function updateDrink() {
+        const mode = document.getElementById('drink-calc-mode').value;
+        const glassVolume_ml = safeParseFloat('drink-glass-volume');
+        
+        let finalTotalPPM = 0;
+        let syrupVolume_ml = 0;
+        let resultActionText = "";
+        
+        if (mode === 'ppm') {
+            const targetPPM = safeParseFloat('drink-target-ppm');
+            if (syrupTotalPPM > 0) {
+                syrupVolume_ml = (targetPPM * glassVolume_ml) / syrupTotalPPM;
+            }
+            syrupVolume_ml = Math.min(syrupVolume_ml, glassVolume_ml);
+            finalTotalPPM = targetPPM;
+            resultActionText = `Add <strong>Syrup:</strong> ${syrupVolume_ml.toFixed(2)} ml`;
+        } else {
+            syrupVolume_ml = safeParseFloat('drink-syrup-vol');
+            syrupVolume_ml = Math.min(syrupVolume_ml, glassVolume_ml);
+            if (glassVolume_ml > 0) {
+                finalTotalPPM = (syrupTotalPPM * syrupVolume_ml) / glassVolume_ml;
+            }
+            resultActionText = `Using <strong>Syrup:</strong> ${syrupVolume_ml.toFixed(2)} ml`;
+        }
+        
+        const waterVolume_ml = glassVolume_ml - syrupVolume_ml;
+        
+        // Calculate individual solute PPMs in final drink
+        let drinkSolutePPMs = {};
+        Object.entries(syrupSolutePPMs).forEach(([name, syrupPPM]) => {
+            if (glassVolume_ml > 0) {
+                drinkSolutePPMs[name] = (syrupPPM * syrupVolume_ml) / glassVolume_ml;
+            } else {
+                drinkSolutePPMs[name] = 0;
+            }
+        });
+        
+        // Display breakdown
+        let breakdownHTML = '<strong>Final Drink PPM Breakdown:</strong><div style="margin-top: 10px;">';
+        Object.entries(drinkSolutePPMs).forEach(([name, ppm]) => {
+            breakdownHTML += `<div class="ppm-item"><span>${name}:</span><span>${ppm.toFixed(2)} ppm</span></div>`;
+        });
+        breakdownHTML += `<div class="ppm-item"><span>Total:</span><span>${finalTotalPPM.toFixed(2)} ppm</span></div>`;
+        breakdownHTML += '</div>';
+        
+        // Add desired PPM display for FEMA solutes
+        let desiredPPMHTML = '';
+        let hasFEMASolutes = false;
+        Object.entries(selectedSolutes).forEach(([soluteId, femaData]) => {
+            if (femaData && femaData.beveragePPM > 0) {
+                hasFEMASolutes = true;
+                const soluteName = femaData.name;
+                const desiredPPM = femaData.beveragePPM;
+                const actualPPM = drinkSolutePPMs[soluteName] || 0;
+                const percentOfDesired = desiredPPM > 0 ? (actualPPM / desiredPPM * 100).toFixed(1) : 0;
+                
+                if (!desiredPPMHTML) {
+                    desiredPPMHTML = '<div class="desired-ppm-display"><strong>Desired Beverage PPM Targets:</strong><div style="margin-top: 8px;">';
+                }
+                desiredPPMHTML += `<div style="margin-bottom: 5px;">
+                    <strong>${soluteName}:</strong> ${actualPPM.toFixed(2)} ppm / ${desiredPPM.toFixed(2)} ppm target 
+                    <span style="color: ${percentOfDesired < 80 ? '#f44336' : percentOfDesired > 120 ? '#ff9800' : '#4caf50'}">
+                        (${percentOfDesired}%)
+                    </span>
+                </div>`;
+            }
+        });
+        if (desiredPPMHTML) {
+            desiredPPMHTML += '</div></div>';
+        }
+        
+        document.getElementById('drink-result-action').innerHTML = resultActionText;
+        document.getElementById('drink-water-result').textContent = waterVolume_ml.toFixed(2);
+        document.getElementById('drink-ppm-breakdown').innerHTML = breakdownHTML + desiredPPMHTML;
+    }
+
+    // FEMA Solute Database - Embedded data as fallback
+    let femaDatabase = {
+        // Add your FEMA data here - this is just sample structure
+        "Acetaldehyde": { name: "Acetaldehyde", femaNumber: "2003", density: 0.78, beveragePPM: 5 },
+        "Acetic Acid": { name: "Acetic Acid", femaNumber: "2006", density: 1.05, beveragePPM: 50 },
+        "Almond Bitter Oil": { name: "Almond Bitter Oil", femaNumber: "2045", density: 1.05, beveragePPM: 10 },
+        "Anise Oil": { name: "Anise Oil", femaNumber: "2086", density: 0.98, beveragePPM: 20 },
+        "Benzaldehyde": { name: "Benzaldehyde", femaNumber: "2127", density: 1.04, beveragePPM: 15 },
+        "Butyric Acid": { name: "Butyric Acid", femaNumber: "2221", density: 0.96, beveragePPM: 8 },
+        "Cinnamon Oil": { name: "Cinnamon Oil", femaNumber: "2291", density: 1.05, beveragePPM: 12 },
+        "Citral": { name: "Citral", femaNumber: "2303", density: 0.89, beveragePPM: 18 },
+        "Citric Acid": { name: "Citric Acid", femaNumber: "2306", density: 1.66, beveragePPM: 300 },
+        "Diacetyl": { name: "Diacetyl", femaNumber: "2370", density: 0.99, beveragePPM: 4 },
+        "Ethyl Acetate": { name: "Ethyl Acetate", femaNumber: "2414", density: 0.90, beveragePPM: 25 },
+        "Ethyl Butyrate": { name: "Ethyl Butyrate", femaNumber: "2427", density: 0.88, beveragePPM: 12 },
+        "Eucalyptol": { name: "Eucalyptol", femaNumber: "2465", density: 0.92, beveragePPM: 8 },
+        "Lemon Oil": { name: "Lemon Oil", femaNumber: "2625", density: 0.85, beveragePPM: 30 },
+        "Limonene": { name: "Limonene", femaNumber: "2633", density: 0.84, beveragePPM: 50 },
+        "Linalool": { name: "Linalool", femaNumber: "2635", density: 0.87, beveragePPM: 10 },
+        "Menthol": { name: "Menthol", femaNumber: "2665", density: 0.89, beveragePPM: 15 },
+        "Orange Oil": { name: "Orange Oil", femaNumber: "2825", density: 0.84, beveragePPM: 35 },
+        "Peppermint Oil": { name: "Peppermint Oil", femaNumber: "2848", density: 0.90, beveragePPM: 25 },
+        "Vanillin": { name: "Vanillin", femaNumber: "3107", density: 1.06, beveragePPM: 50 }
+    };
+    let selectedSolutes = {};
+
+    async function loadFEMADatabase() {
+        // Try multiple methods to load the CSV
+        const directUrl = 'https://raw.githubusercontent.com/chadant1/PPM-Calculation/main/FEMA%20PPM\'s.csv';
+        const proxies = [
+            directUrl, // Try direct first
+            `https://api.allorigins.win/raw?url=${encodeURIComponent(directUrl)}`,
+            `https://corsproxy.io/?${encodeURIComponent(directUrl)}`
+        ];
+        
+        for (let i = 0; i < proxies.length; i++) {
+            try {
+                console.log(`Attempting to load FEMA database (method ${i + 1})...`);
+                const response = await fetch(proxies[i]);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const csvText = await response.text();
+                
+                // Check if we got valid CSV data
+                if (!csvText || csvText.includes('<!DOCTYPE') || csvText.includes('<html')) {
+                    throw new Error('Invalid CSV data received');
+                }
+                
+                const lines = csvText.split('\n');
+                
+                // Clear existing data
+                femaDatabase = {};
+                let successCount = 0;
+                
+                // Parse CSV (skip header row)
+                for (let j = 1; j < lines.length; j++) {
+                    const line = lines[j].trim();
+                    if (!line) continue;
+                    
+                    // Parse CSV line (handling quoted fields)
+                    const fields = parseCSVLine(line);
+                    
+                    if (fields.length >= 3) {
+                        const femaAndSubstance = fields[0];
+                        const beveragePPM = fields[1];
+                        const density = fields[2];
+                        
+                        // Extract FEMA number and substance name
+                        const match = femaAndSubstance.match(/^(\d+)\s+(.+)$/);
+                        if (match) {
+                            const femaNumber = match[1];
+                            const substanceName = match[2].trim();
+                            
+                            femaDatabase[substanceName] = {
+                                name: substanceName,
+                                femaNumber: femaNumber,
+                                density: parseFloat(density) || 1.0,
+                                beveragePPM: parseFloat(beveragePPM) || 0
+                            };
+                            successCount++;
+                        }
+                    }
+                }
+                
+                console.log(`✓ FEMA Database loaded successfully: ${successCount} entries`);
+                
+                // Update all existing solute search boxes
+                solutes.forEach(soluteId => {
+                    updateSoluteSearchBox(soluteId);
+                });
+                
+                return; // Success - exit function
+            } catch (error) {
+                console.log(`Method ${i + 1} failed:`, error.message);
+                // Continue to next method
+            }
+        }
+        
+        // All methods failed - use embedded data
+        console.log('All loading methods failed. Using embedded FEMA database:', Object.keys(femaDatabase).length, 'entries');
+        console.log('You can still manually paste CSV data using the browser console:');
+        console.log('Call: loadFEMAFromText(csvText) with your CSV content');
+        
+        solutes.forEach(soluteId => {
+            updateSoluteSearchBox(soluteId);
+        });
+    }
+    
+    // Allow manual loading from console or file upload
+    window.loadFEMAFromText = function(csvText) {
+        const lines = csvText.split('\n');
+        femaDatabase = {};
+        let count = 0;
+        
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            
+            const fields = parseCSVLine(line);
+            
+            if (fields.length >= 3) {
+                const femaAndSubstance = fields[0];
+                const beveragePPM = fields[1];
+                const density = fields[2];
+                
+                const match = femaAndSubstance.match(/^(\d+)\s+(.+)$/);
+                if (match) {
+                    const femaNumber = match[1];
+                    const substanceName = match[2].trim();
+                    
+                    femaDatabase[substanceName] = {
+                        name: substanceName,
+                        femaNumber: femaNumber,
+                        density: parseFloat(density) || 1.0,
+                        beveragePPM: parseFloat(beveragePPM) || 0
+                    };
+                    count++;
+                }
+            }
+        }
+        
+        console.log(`Loaded ${count} entries from CSV`);
+        solutes.forEach(soluteId => {
+            updateSoluteSearchBox(soluteId);
+        });
+        return count;
+    };
+
+    function handleCSVUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const statusEl = document.getElementById('upload-status');
+        statusEl.textContent = 'Loading...';
+        statusEl.style.color = 'white';
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const csvText = e.target.result;
+            const count = window.loadFEMAFromText(csvText);
+            statusEl.textContent = `✓ Loaded ${count} flavors`;
+            statusEl.style.color = '#4caf50';
+            
+            setTimeout(() => {
+                statusEl.textContent = '';
+            }, 3000);
+        };
+        reader.onerror = function() {
+            statusEl.textContent = '✗ Failed to load file';
+            statusEl.style.color = '#f44336';
+        };
+        reader.readAsText(file);
+    }
+    
+    function parseCSVLine(line) {
+        const fields = [];
+        let currentField = '';
+        let inQuotes = false;
+        
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+                fields.push(currentField.trim());
+                currentField = '';
+            } else {
+                currentField += char;
+            }
+        }
+        
+        fields.push(currentField.trim());
+        return fields;
+    }
+    
+    function updateSoluteSearchBox(soluteId) {
+        const searchInput = document.getElementById(`${soluteId}-fema-search`);
+        if (searchInput) {
+            const count = Object.keys(femaDatabase).length;
+            searchInput.placeholder = `Search ${count} flavor${count !== 1 ? 's' : ''}...`;
+        }
+    }
+
+    // Initial setup
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Load FEMA database first
+        await loadFEMADatabase();
+        
+        document.getElementById('essence-solvent').addEventListener('input', updateEssence);
+        document.getElementById('syrup-calc-mode').addEventListener('change', toggleSyrupMode);
+        document.getElementById('syrup-target-ppm').addEventListener('input', updateSyrup);
+        document.getElementById('syrup-essence-vol').addEventListener('input', updateSyrup);
+        document.getElementById('syrup-final-volume').addEventListener('input', updateSyrup);
+        document.getElementById('drink-calc-mode').addEventListener('change', toggleDrinkMode);
+        document.getElementById('drink-target-ppm').addEventListener('input', updateDrink);
+        document.getElementById('drink-syrup-vol').addEventListener('input', updateDrink);
+        document.getElementById('drink-glass-volume').addEventListener('input', updateDrink);
+        
+        // Add initial solute
+        addSolute();
+    });
+</script>
+
+</body>
+</html>
